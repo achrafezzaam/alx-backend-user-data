@@ -12,6 +12,14 @@ import os
 app = Flask(__name__)
 app.register_blueprint(app_views)
 CORS(app, resources={r"/api/v1/*": {"origins": "*"}})
+auth = None
+auth_type = getenv('AUTH_TYPE', 'auth')
+if auth_type == 'auth':
+    from api.v1.auth.auth import Auth
+    auth = Auth()
+if auth_type == 'basic_auth':
+    from api.v1.auth.basic_auth import BasicAuth
+    auth = BasicAuth()
 
 
 @app.errorhandler(404)
@@ -20,6 +28,33 @@ def not_found(error) -> str:
     """
     return jsonify({"error": "Not found"}), 404
 
+@app.errorhandler(401)
+def unauthorized(error) -> str:
+    """ Unauthorized request handler
+    """
+    return jsonify({"error": "Unauthorized"}), 401
+
+@app.errorhandler(403)
+def forbidden(error) -> str:
+    """ User not allowed to access ressource
+    """
+    return jsonify({"error": "Forbidden"}), 403
+
+@app.before_request
+def authenticate_user():
+    """ Check if the user is authenticated before handling a request
+    """
+    if auth:
+        path_list = [
+                '/api/v1/status/',
+                '/api/v1/unauthorized/',
+                '/api/v1/forbidden/'
+                ]
+        if auth.require_auth(request.path, path_list):
+            if auth.authorization_header(request) is None:
+                abort(401)
+            if auth.current_user(request) is None:
+                abort(403)
 
 if __name__ == "__main__":
     host = getenv("API_HOST", "0.0.0.0")
