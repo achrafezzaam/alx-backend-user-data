@@ -28,11 +28,13 @@ def not_found(error) -> str:
     """
     return jsonify({"error": "Not found"}), 404
 
+
 @app.errorhandler(401)
 def unauthorized(error) -> str:
     """ Unauthorized request handler
     """
     return jsonify({"error": "Unauthorized"}), 401
+
 
 @app.errorhandler(403)
 def forbidden(error) -> str:
@@ -40,8 +42,9 @@ def forbidden(error) -> str:
     """
     return jsonify({"error": "Forbidden"}), 403
 
+
 @app.before_request
-def authenticate_user():
+def authenticate_user() -> None:
     """ Check if the user is authenticated before handling a request
     """
     if auth:
@@ -55,6 +58,7 @@ def authenticate_user():
                 abort(401)
             if auth.current_user(request) is None:
                 abort(403)
+
 
 if __name__ == "__main__":
     host = getenv("API_HOST", "0.0.0.0")
