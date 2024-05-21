@@ -2,6 +2,7 @@
 ''' Define the Auth class '''
 from flask import request
 from typing import List, TypeVar
+import re
 
 
 class Auth:
@@ -10,8 +11,15 @@ class Auth:
         """ Check if the user is authenticated """
         if path is None or excluded_paths in [None, []]:
             return True
-        if path in excluded_paths or (path + '/') in excluded_paths:
-            return False
+        for elem in excluded_paths:
+            if elem[-1] == '*':
+                save = '{}.*'.format(elem[0:-1])
+            elif elem[-1] == '/':
+                save = '{}/*'.format(elem[0:-1])
+            else:
+                save = '{}/*'.format(elem)
+            if re.match(save, path):
+                return False
         return True
 
     def authorization_header(self, request=None) -> str:
