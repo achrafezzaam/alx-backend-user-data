@@ -46,7 +46,7 @@ def login() -> str:
 
 
 @app.route("/sessions", methods=["DELETE"], strict_slashes=False)
-def logout() -> None:
+def logout() -> str:
     """DELETE /sessions
     """
     cookie = request.cookies.get("session_id")
@@ -54,11 +54,11 @@ def logout() -> None:
     if user is None:
         abort(403)
     AUTH.destroy_session(user.id)
-    return redirect('/')
+    return redirect("/")
 
 
 @app.route("/profile", methods=["GET"], strict_slashes=False)
-def profile() -> None:
+def profile() -> str:
     """GET /profile
         Return: The profile payload
     """
@@ -70,7 +70,7 @@ def profile() -> None:
 
 
 @app.route("/reset_password", methods=["POST"], strict_slashes=False)
-def get_reset_password_token() -> None:
+def get_reset_password_token() -> str:
     """POST /reset_password
     """
     email = request.form.get("email")
@@ -85,7 +85,7 @@ def get_reset_password_token() -> None:
 
 
 @app.route("/reset_password", methods=["PUT"], strict_slashes=False)
-def update_password() -> None:
+def update_password() -> str:
     """PUT /reset_password
     """
     email = request.form.get("email")
